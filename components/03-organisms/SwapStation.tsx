@@ -7,7 +7,7 @@ import {
   Tooltip,
 } from "@/components/01-atoms";
 import { ConfirmSwapModal, OfferSummary } from "@/components/02-molecules";
-import { TokensShelfVariant } from "@/components/03-organisms";
+import { ForWhom } from "@/components/03-organisms";
 import { useAuthenticatedUser } from "@/lib/client/hooks/useAuthenticatedUser";
 import { useContext, useEffect, useState } from "react";
 import cc from "classcat";
@@ -93,8 +93,8 @@ export const SwapStation = () => {
           <SwapExpireTime />
         </div>
         <div className="flex flex-col gap-2 relative">
-          <OfferSummary variant={TokensShelfVariant.Their} />
-          <OfferSummary variant={TokensShelfVariant.Your} />
+          <OfferSummary variant={ForWhom.Their} />
+          <OfferSummary variant={ForWhom.Your} />
 
           <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 border dark:border-[#353836]  border-[#E4E4E4] dark:bg-[#212322] bg-[#F6F6F6] rounded-[100px] w-[36px] h-[36px] items-center flex justify-center">
             <SwapIcon

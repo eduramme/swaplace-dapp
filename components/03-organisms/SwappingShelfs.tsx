@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { TokensShelf, TokensShelfVariant } from "@/components/03-organisms";
+import { TokensShelf, ForWhom } from "@/components/03-organisms";
 import {
   SearchItemsShelf,
   SwapContext,
@@ -52,10 +52,10 @@ export const SwappingShelfs = () => {
       </div>
       <div className="p-5">
         <div className={cc([activeSwappingShelfID ? "hidden" : "block"])}>
-          <TokensShelf variant={TokensShelfVariant.Their} />
+          <TokensShelf variant={ForWhom.Their} />
         </div>
         <div className={cc([activeSwappingShelfID ? "block" : "hidden"])}>
-          <TokensShelf variant={TokensShelfVariant.Your} />
+          <TokensShelf variant={ForWhom.Your} />
         </div>
       </div>
     </div>

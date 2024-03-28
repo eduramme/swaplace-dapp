@@ -1,11 +1,17 @@
+import { ForWhom } from "../03-organisms";
 import {
   AddTokenOrSwapManuallyModal,
   AddTokenOrSwapManuallyModalVariant,
 } from "@/components/02-molecules";
 import { PlusIcon, Tooltip } from "@/components/01-atoms";
 import { useState } from "react";
+interface AddTokenCardManuallyProps {
+  forWhom: ForWhom;
+}
 
-export const AddTokenCardManually = () => {
+export const AddTokenCardManually = ({
+  forWhom,
+}: AddTokenCardManuallyProps) => {
   const [open, setOpen] = useState(false);
 
   return (
@@ -38,6 +44,7 @@ export const AddTokenCardManually = () => {
       <AddTokenOrSwapManuallyModal
         variant={AddTokenOrSwapManuallyModalVariant.TOKEN}
         onClose={() => setOpen(false)}
+        forWhom={forWhom}
         open={open}
       />
     </>

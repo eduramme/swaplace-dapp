@@ -1,7 +1,4 @@
-import {
-  TokenOfferVariant,
-  TokensShelfVariant,
-} from "@/components/03-organisms";
+import { TokenOfferVariant, ForWhom } from "@/components/03-organisms";
 import {
   TokenCardActionType,
   TokenCardStyleType,
@@ -32,11 +29,11 @@ export const CardOffers = ({
     useContext(SwapContext);
 
   const tokenShelfVariant = authenticatedUserAddress?.equals(address)
-    ? TokensShelfVariant.Your
-    : TokensShelfVariant.Their;
-  const tokensOfferFor: Record<TokensShelfVariant, Token[]> = {
-    [TokensShelfVariant.Your]: searchedUserTokensList,
-    [TokensShelfVariant.Their]: authenticatedUserTokensList,
+    ? ForWhom.Your
+    : ForWhom.Their;
+  const tokensOfferFor: Record<ForWhom, Token[]> = {
+    [ForWhom.Your]: searchedUserTokensList,
+    [ForWhom.Their]: authenticatedUserTokensList,
   };
 
   const HorizontalVariant = (address: EthereumAddress | null) => {
