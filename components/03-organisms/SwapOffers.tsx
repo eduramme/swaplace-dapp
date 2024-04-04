@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable react-hooks/exhaustive-deps */
 import { SwapOfferCard } from "../02-molecules/SwapOfferCard";
+import { retrieveDataFromTokensArray } from "@/lib/client/blockchain-utils";
 import {
   TokenOfferDetails,
   SwapIcon,
@@ -8,7 +9,6 @@ import {
 } from "@/components/01-atoms";
 import { usePonder } from "@/lib/client/hooks/usePonder";
 import { EthereumAddress, Token } from "@/lib/shared/types";
-import { retrieveDataFromTokensArray } from "@/lib/client/blockchain-utils";
 import cc from "classcat";
 import { useEffect, useState } from "react";
 
@@ -77,6 +77,7 @@ export const SwapOffers = ({}: TokenOffersConfig) => {
 
       const formattedAskArray = await retrieveDataFromTokensArray(swap.ask);
       const formattedBidArray = await retrieveDataFromTokensArray(swap.bid);
+
       return {
         id: Number(swap.swapId),
         status: swap.status,
@@ -102,8 +103,8 @@ export const SwapOffers = ({}: TokenOffersConfig) => {
     </div>
   ) : (
     <div className="flex flex-col gap-5">
-      {allTokensListByPonder.map((swap, index) => {
-        return <SwapOffer key={index} swap={swap} />;
+      {allTokensListByPonder.map((swap) => {
+        return <SwapOffer key={swap.id} swap={swap} />;
       })}
     </div>
   );

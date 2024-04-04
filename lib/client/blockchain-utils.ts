@@ -15,6 +15,10 @@ import {
   type OwnedToken,
   type OwnedNft,
   Alchemy,
+  // eslint-disable-next-line import/named
+  Nft,
+  // eslint-disable-next-line import/named
+  TokenMetadataResponse,
 } from "alchemy-sdk";
 import toast from "react-hot-toast";
 import { hexToNumber } from "viem";
@@ -31,6 +35,27 @@ export enum TransactionStatus {
   TRANSACTION_APPROVED,
   SUCCESSFUL_TRANSACTION,
 }
+
+export const initializeAlchemyClient = (chainId: number) => {
+  const networkAPIKey = getAPIKeyForNetwork.get(chainId);
+  const networkName = getNetwork.get(chainId);
+
+  if (!networkAPIKey) {
+    throw new Error("No API Key for this network.");
+  }
+
+  if (!networkName) {
+    throw new Error("No Network Name is defined for this network.");
+  }
+
+  const config = {
+    apiKey: networkAPIKey,
+    network: networkName,
+  };
+  const alchemyClient = new Alchemy(config);
+
+  return alchemyClient;
+};
 
 export const getBlockchainTimestamp = async (chainId: number) => {
   const provider = publicClient({
@@ -75,23 +100,13 @@ export const getERC721TokensFromAddress = async (
   address: EthereumAddress,
   chainId: number,
 ) => {
-  const networkAPIKey = getAPIKeyForNetwork.get(chainId);
   const networkName = getNetwork.get(chainId);
-
-  if (!networkAPIKey) {
-    throw new Error("No API Key for this network.");
-  }
 
   if (!networkName) {
     throw new Error("No Network Name is defined for this network.");
   }
 
-  const config = {
-    apiKey: networkAPIKey,
-    network: networkName,
-  };
-
-  const alchemy = new Alchemy(config);
+  const alchemy = initializeAlchemyClient(chainId);
 
   return alchemy.nft
     .getNftsForOwner(address.address)
@@ -105,58 +120,52 @@ export const getERC721TokensFromAddress = async (
 };
 
 async function getERC20OrERC721Metadata(token: Asset): Promise<Token> {
-  const chainId = sepolia.id;
-  const networkAPIKey = getAPIKeyForNetwork.get(chainId);
-  const networkName = getNetwork.get(chainId);
-
-  if (!networkAPIKey) {
-    throw new Error("No API Key for this network.");
-  }
-
-  if (!networkName) {
-    throw new Error("No Network Name is defined for this network.");
-  }
-
-  const config = {
-    apiKey: networkAPIKey,
-    network: networkName,
-  };
-
-  const alchemy = new Alchemy(config);
+  // Hardcoding Sepolia for now
+  const alchemy = initializeAlchemyClient(sepolia.id);
 
   try {
     const response = await alchemy.core.getTokenMetadata(token.addr);
 
-    // Retrieve metadata as an erc20
     if (!!response.decimals) {
-      return {
-        tokenType: TokenType.ERC20,
-        name: response.name ?? undefined,
-        logo: response.logo ?? undefined,
-        symbol: response.symbol ?? undefined,
-        contract: token.addr,
-        rawBalance: token.amountOrId,
-        decimals: response.decimals,
-      };
+      // ERC20 Token
+      return formatERC20Token(response, token);
     } else {
-      // Retrieve metadata as an erc721
+      // Assuming ERC721 if not ERC20
       const metadata = await alchemy.nft.getNftMetadata(
         token.addr,
         token.amountOrId,
       );
-
-      return {
-        tokenType: TokenType.ERC721,
-        id: token.amountOrId.toString(),
-        name: metadata.name,
-        contract: metadata.contract.address,
-        metadata: metadata,
-      };
+      return formatERC721Token(metadata, token);
     }
   } catch (error) {
     console.error("Error fetching token metadata:", error);
     throw new Error("Error fetching token metadata.");
   }
+}
+
+function formatERC20Token(
+  response: TokenMetadataResponse,
+  token: Asset,
+): ERC20 {
+  return {
+    tokenType: TokenType.ERC20,
+    name: response.name ?? undefined,
+    logo: response.logo ?? undefined,
+    symbol: response.symbol ?? undefined,
+    contract: token.addr,
+    rawBalance: token.amountOrId, // Consider converting this properly
+    decimals: response.decimals ?? undefined,
+  };
+}
+
+function formatERC721Token(metadata: Nft, token: Asset): ERC721 {
+  return {
+    tokenType: TokenType.ERC721,
+    id: token.amountOrId.toString(),
+    name: metadata.name,
+    contract: metadata.contract.address,
+    metadata: metadata,
+  };
 }
 
 // retrieve data for array of tokens
@@ -168,7 +177,6 @@ export const retrieveDataFromTokensArray = async (
 
   // Wait for all promises to resolve
   const newTokensList = await Promise.all(promises);
-
   return newTokensList;
 };
 
@@ -200,11 +208,7 @@ export const getERC20TokensFromAddress = async (
     throw new Error("No Network Name is defined for this network.");
   }
 
-  const config = {
-    apiKey: alchemyApiKey,
-    network: networkName,
-  };
-  const alchemy = new Alchemy(config);
+  const alchemy = initializeAlchemyClient(chainId);
 
   const ownerAddress = address;
 
